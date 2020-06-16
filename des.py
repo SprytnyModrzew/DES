@@ -95,12 +95,6 @@ s_box = \
       [2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11]]]
 
 
-# input_plaintext = bitarray('0001001000110100010101101010101111001101000100110010010100110110')
-# input_key = bitarray('1010101010111011000010010001100000100111001101101100110011011101')
-
-
-# print(input_key.length())
-
 def init_permutation(plaintext):
     temp = plaintext.copy()
     for i in range(0, 64):
@@ -130,7 +124,6 @@ def pc2_function(key):
 
 
 def leftshift(ba, count):
-    # print(ba)
     x = ba
     while count:
         x = x[1:] + (bitarray('0'))
@@ -138,7 +131,6 @@ def leftshift(ba, count):
             x[-1] = True
         count -= 1
         ba = x
-    # print(x)
     return x
 
 
@@ -179,7 +171,6 @@ def permutation_function(r):
 def s_box_substitution(number, r):
     column = 0
     row = 0
-    # print(r.to01())
     if r[0]:
         row += 2
     if r[-1]:
@@ -201,7 +192,6 @@ def f_function(r, k):
     substituted = bitarray()
     for i in range(0, 8):
         temp = s_box_substitution(i, temp_r[6 * i:(6 * i + 6)])
-        # print(temp)
         if temp & 8:
             substituted.append(True)
         else:
@@ -223,10 +213,8 @@ def f_function(r, k):
 
 def encrypt(plaintext, encryption_key):
     plaintext = init_permutation(plaintext)
-    # print(input_plaintext.to01())
     left = plaintext[0:32]
     right = plaintext[32:64]
-    # print(L.to01())
     encryption_key = pc1_function(encryption_key)
     y = encryption_key
     for i in range(0, 16):
@@ -234,7 +222,6 @@ def encrypt(plaintext, encryption_key):
             flips = 1
         else:
             flips = 2
-        # print(i)
         y = rotate(y, flips, True)
         x = pc2_function(y)
         temporary_l = left.copy()
@@ -255,14 +242,12 @@ def decrypt(plaintext, decryption_key):
     decryption_key = pc1_function(decryption_key)
     y = decryption_key
     for i in range(0, 16):
-        # print("next one " + str(i))
         if i == 0:
             flips = 0
         elif i == 1 or i == 8 or i == 15:
             flips = 1
         else:
             flips = 2
-        # print(i)
         y = rotate(y, flips, False)
         x = pc2_function(y)
         temporary_l = left.copy()
@@ -270,7 +255,6 @@ def decrypt(plaintext, decryption_key):
         right = temporary_l ^ f_function(right, x)
 
     combined = final_permutation(bitarray(right.to01() + left.to01()))
-    # print(combined.to01())
     return combined
 
 
@@ -282,7 +266,6 @@ def pack_string(string_input):
         temp = t[i * 64:i * 64 + 64]
         if temp.length() < 64:
             temp = bitarray("0") * (64 - temp.length()) + temp
-        # print(temp.length())
         temp_list.append(temp)
     return temp_list
 
@@ -295,20 +278,6 @@ def pack_key(key_to_pack):
 def pack_hex(hex_to_pack):
     b = [hex_to_pack >> i & 1 for i in range(7, -1, -1)]
     return bitarray(b)
-
-
-# print(input_key.to01())
-# print("110010100110011010000011100101101111010001100")
-# uuu = encrypt(input_plaintext, input_key)
-# decrypt(uuu, input_key)
-'''
-lis = pack_string("123456789sdsdadsadasdsadasdsadsa0")
-the_key = pack_key(2320323)
-for e in range(0, len(lis)):
-    uuu = encrypt(lis[e], the_key)
-    xy = decrypt(uuu, the_key)
-    print(xy.tostring())
-'''
 
 
 class Crypt(QDialog):
@@ -365,15 +334,13 @@ class Decrypt(Crypt):
     def action_crypt(self):
         if self.radio_button_hex.isChecked():
             x = bytes.fromhex(self.plain_text_entry.toPlainText())
-            # print(x)
             xy = bitarray()
             for i in range(0, len(x)):
                 xy = xy + pack_hex(x[i])
-                # print(xy)
-            # print(len(xy))
+
         else:
             xy = bitarray(self.plain_text_entry.toPlainText())
-        print(int(self.key_form_line.text()))
+
         the_key = pack_key(int(self.key_form_line.text()))
 
         string_text = ""
@@ -398,16 +365,13 @@ class Decrypt(Crypt):
 class Encrypt(Crypt):
     def action_crypt(self):
         lis = pack_string(self.plain_text_entry.toPlainText())
-        print("woop")
+
         the_key = pack_key(int(self.key_int))
-        print(int(self.key_int))
+
         string_text = ""
         for e in range(0, len(lis)):
             uuu = encrypt(lis[e], the_key)
             string_text += uuu.to01()
-            # self.plain_text_result.setPlainText(uuu.tobytes().hex())
-            # xy = decrypt(uuu, the_key)
-            # print(xy.to01())
         if self.radio_button_hex.isChecked():
             self.plain_text_result.setPlainText(bitarray(string_text).tobytes().hex())
         else:
@@ -417,7 +381,7 @@ class Encrypt(Crypt):
 
     def get_key(self):
         self.key_int = self.key.get_next_key()
-        self.key_form_label.setText("Key:"+str(self.key_int))
+        self.key_form_label.setText("Key:" + str(self.key_int))
 
     def __init__(self, parent=None):
         super(Encrypt, self).__init__(parent)
@@ -427,7 +391,7 @@ class Encrypt(Crypt):
         self.plain_text_label.setText("Text to encrypt")
         self.plain_text_label_result.setText("Result:")
         self.button_crypt.setText("Encrypt")
-        self.key_form_label.setText("Key:"+str(self.key_int))
+        self.key_form_label.setText("Key:" + str(self.key_int))
         self.key_form_label2.hide()
         self.key_form_line.hide()
 
@@ -448,20 +412,18 @@ class Form(QDialog):
         self.button = QPushButton("Encrypt")
         self.button2 = QPushButton("Decrypt")
 
-        # Create layout and add widgets
         layout = QVBoxLayout()
         layout.addWidget(self.button)
         layout.addWidget(self.button2)
-        # Set dialog layout
+
         self.button.clicked.connect(self.encrypt)
         self.button2.clicked.connect(self.decrypt)
         self.setLayout(layout)
 
 
 if __name__ == '__main__':
-    # Create the Qt Application
     app = QApplication(sys.argv)
     form = Form()
     form.show()
-    # Run the main Qt loop
+
     sys.exit(app.exec_())

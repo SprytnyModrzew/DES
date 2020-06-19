@@ -4,17 +4,16 @@ from PyQt5.QtWidgets import (QLineEdit, QPushButton, QApplication,
                              QVBoxLayout, QDialog, QLabel, QFormLayout, QGroupBox, QPlainTextEdit,
                              QHBoxLayout, QRadioButton)
 from bitarray import bitarray
+import generator
 
 
 class Keys:
     def __init__(self):
-        f = open('numbers.txt', "r")
-        self.lines_all = list(f)
-        self.current = 0
+        self.z = generator.get_rgb()
+        self.rng_gen = generator.get_rng(self.z)
 
     def get_next_key(self):
-        self.current += 1
-        return self.lines_all[self.current]
+        return self.rng_gen.__next__()
 
 
 permutation_start = [58, 50, 42, 34, 26, 18, 10, 2, 60, 52, 44, 36, 28, 20, 12, 4,
